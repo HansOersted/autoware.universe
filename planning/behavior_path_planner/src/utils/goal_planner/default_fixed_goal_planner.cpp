@@ -35,6 +35,10 @@ BehaviorModuleOutput DefaultFixedGoalPlanner::plan(
     modifyPathForSmoothGoalConnection(*(output.path), planner_data);
   output.path = std::make_shared<PathWithLaneId>(smoothed_path);
   output.reference_path = getPreviousModuleOutput().reference_path;
+
+  std::cerr << "REAL number of output.path->points:" << output.path->points.size() << std::endl;
+  std::cerr << "REAL number of output.reference_path->points:" << output.reference_path->points.size() << std::endl;
+
   return output;
 }
 
