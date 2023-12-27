@@ -314,7 +314,7 @@ bool isWithinIntersection(
   const auto polygon = route_handler->getLaneletMapPtr()->polygonLayer.get(std::atoi(id.c_str()));
 
   return boost::geometry::within(
-    object_polygon, utils::toPolygon2d(lanelet::utils::to2D(polygon.basicPolygon())));
+    object_polygon, tier4_autoware_utils::toPolygon2d(lanelet::utils::to2D(polygon.basicPolygon())));
 }
 
 bool isParallelToEgoLane(const ObjectData & object, const double threshold)
@@ -940,7 +940,7 @@ Polygon2d createEnvelopePolygon(
   using tier4_autoware_utils::Polygon2d;
   using Box = bg::model::box<Point2d>;
 
-  const auto toPolygon2d = [](const geometry_msgs::msg::Polygon & polygon) {
+  const auto tier4_autoware_utils::toPolygon2d = [](const geometry_msgs::msg::Polygon & polygon) {
     Polygon2d ret{};
 
     for (const auto & p : polygon.points) {
@@ -974,7 +974,7 @@ Polygon2d createEnvelopePolygon(
   tf2::doTransform(
     toMsg(envelope_poly, closest_pose.position.z), envelope_ros_polygon, geometry_tf);
 
-  const auto expanded_polygon = expandPolygon(toPolygon2d(envelope_ros_polygon), envelope_buffer);
+  const auto expanded_polygon = expandPolygon(tier4_autoware_utils::toPolygon2d(envelope_ros_polygon), envelope_buffer);
   return expanded_polygon;
 }
 

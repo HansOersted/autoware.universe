@@ -119,6 +119,30 @@ Polygon2d rotatePolygon(const Polygon2d & polygon, const double angle)
   return rotated_polygon;
 }
 
+Polygon2d toPolygon2d(const lanelet::ConstLanelet & lanelet)
+{
+  Polygon2d polygon;
+  for (const auto & p : lanelet.polygon2d().basicPolygon()) {
+    polygon.outer().emplace_back(p.x(), p.y());
+  }
+  polygon.outer().push_back(polygon.outer().front());
+
+  return tier4_autoware_utils::isClockwise(polygon)
+           ? polygon
+           : tier4_autoware_utils::inverseClockwise(polygon);
+}
+
+Polygon2d toPolygon2d(const lanelet::BasicPolygon2d & polygon)
+{
+  Polygon2d ret;
+  for (const auto & p : polygon) {
+    ret.outer().emplace_back(p.x(), p.y());
+  }
+  ret.outer().push_back(ret.outer().front());
+
+  return tier4_autoware_utils::isClockwise(ret) ? ret : tier4_autoware_utils::inverseClockwise(ret);
+}
+
 Polygon2d toPolygon2d(
   const geometry_msgs::msg::Pose & pose, const autoware_auto_perception_msgs::msg::Shape & shape)
 {

@@ -64,6 +64,8 @@ geometry_msgs::msg::Polygon rotatePolygon(
 /// @param[in] polygon input polygon
 /// @param[in] angle angle of rotation [rad]
 /// @return rotated polygon
+Polygon2d toPolygon2d(const lanelet::ConstLanelet & lanelet);
+Polygon2d toPolygon2d(const lanelet::BasicPolygon2d & polygon);
 Polygon2d rotatePolygon(const Polygon2d & polygon, const double angle);
 Polygon2d toPolygon2d(
   const geometry_msgs::msg::Pose & pose, const autoware_auto_perception_msgs::msg::Shape & shape);
