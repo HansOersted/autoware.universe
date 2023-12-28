@@ -35,6 +35,10 @@
 #include <boost/geometry/geometries/geometries.hpp>
 #include <boost/geometry/geometries/register/point.hpp>
 
+#include <lanelet2_core/primitives/Lanelet.h>
+#include <lanelet2_core/geometry/Polygon.h>
+
+
 #include <vector>
 
 // cppcheck-suppress unknownMacro
