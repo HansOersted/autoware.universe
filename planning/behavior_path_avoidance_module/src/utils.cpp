@@ -940,7 +940,7 @@ Polygon2d createEnvelopePolygon(
   using tier4_autoware_utils::Polygon2d;
   using Box = bg::model::box<Point2d>;
 
-  const auto tier4_autoware_utils::toPolygon2d = [](const geometry_msgs::msg::Polygon & polygon) {
+  const auto toPolygon2d = [](const geometry_msgs::msg::Polygon & polygon) {
     Polygon2d ret{};
 
     for (const auto & p : polygon.points) {
@@ -974,7 +974,7 @@ Polygon2d createEnvelopePolygon(
   tf2::doTransform(
     toMsg(envelope_poly, closest_pose.position.z), envelope_ros_polygon, geometry_tf);
 
-  const auto expanded_polygon = expandPolygon(tier4_autoware_utils::toPolygon2d(envelope_ros_polygon), envelope_buffer);
+  const auto expanded_polygon = expandPolygon(toPolygon2d(envelope_ros_polygon), envelope_buffer);
   return expanded_polygon;
 }
 
