@@ -178,6 +178,7 @@ Float32MultiArrayStamped MPC::generateDiagData(
     Uex(0), -m_steer_lim,
     m_steer_lim));  // [21] control signal after the saturation constraint (clamp)
   append_diag(mpc_data_traj_raw.lateral_err);  // [22] lateral error from raw trajectory
+  append_diag(m_is_forward_shift); // [23] driving direction (1: forward, 0: backward)
 
   return diagnostic;
 }
