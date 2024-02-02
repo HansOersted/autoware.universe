@@ -217,6 +217,9 @@ private:
   double m_lateral_error_prev = 0.0;   // Previous lateral error for derivative calculation.
   double m_yaw_error_prev = 0.0;       // Previous heading error for derivative calculation.
 
+  double m_current_upper_bound = 0.0;  // Current upper bound of the steering rate limit.
+  double m_current_lower_bound = 0.0;  // Current lower bound of the steering rate limit.
+
   bool m_is_forward_shift = true;  // Flag indicating if the shift is in the forward direction.
 
   double m_min_prediction_length = 5.0;  // Minimum prediction distance.
