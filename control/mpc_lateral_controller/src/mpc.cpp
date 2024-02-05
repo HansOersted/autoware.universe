@@ -196,8 +196,6 @@ Float32MultiArrayStamped MPC::generateDiagData(
     m_steer_lim));  // [21] control signal after the saturation constraint (clamp)
   append_diag(mpc_data_traj_raw.lateral_err);  // [22] lateral error from raw trajectory
   append_diag(m_is_forward_shift); // [23] driving direction (1: forward, 0: backward)
-  append_diag(m_current_upper_bound); // [24] upper bound of the steering angle
-  append_diag(m_current_lower_bound); // [25] lower bound of the steering angle
 
   return diagnostic;
 }
@@ -617,9 +615,6 @@ std::pair<bool, VectorXd> MPC::executeOptimization(
   VectorXd lbA = -steer_rate_limits * prediction_dt;
   ubA(0) = m_raw_steer_cmd_prev + steer_rate_limits(0) * m_ctrl_period;
   lbA(0) = m_raw_steer_cmd_prev - steer_rate_limits(0) * m_ctrl_period;
-
-  m_current_upper_bound = ubA(0);
-  m_current_lower_bound = lbA(0);
 
   auto t_start = std::chrono::system_clock::now();
   bool solve_result = m_qpsolver_ptr->solve(H, f.transpose(), A, lb, ub, lbA, ubA, Uex);
