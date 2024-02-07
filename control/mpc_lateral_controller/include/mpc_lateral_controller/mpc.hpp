@@ -34,6 +34,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <tuple> // for std::tie
 
 namespace autoware::motion::control::mpc_lateral_controller
 {
@@ -220,6 +221,8 @@ private:
   bool m_is_forward_shift = true;  // Flag indicating if the shift is in the forward direction.
 
   double m_min_prediction_length = 5.0;  // Minimum prediction distance.
+
+  bool optimization_solve_result{true};
 
   /**
    * @brief Get variables for MPC calculation.

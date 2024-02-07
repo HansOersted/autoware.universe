@@ -57,39 +57,58 @@ bool MPC::calculateMPC(
 
   // resample reference trajectory with mpc sampling time
   const double mpc_start_time = mpc_data.nearest_time + m_param.input_delay;
-  const double prediction_dt =
-    getPredictionDeltaTime(mpc_start_time, reference_trajectory, current_kinematics) * 0.6;
+  double prediction_dt =
+    getPredictionDeltaTime(mpc_start_time, reference_trajectory, current_kinematics);
 
-  const auto [success_resample, mpc_resampled_ref_trajectory] =
-    resampleMPCTrajectoryByTime(mpc_start_time, prediction_dt, reference_trajectory);
-  if (!success_resample) {
-    return fail_warn_throttle("trajectory resampling failed. Stop MPC.");
-  }
+  VectorXd Uex;
+  MPCMatrix mpc_matrix;
+  MPCTrajectory mpc_resampled_ref_trajectory;
+  bool success_data_traj_raw;
+  bool success_resample;
+  bool success_data_for_diagnostic;
+  bool success_opt;
+  MPCData mpc_data_for_diagnostic;
+  MPCData mpc_data_traj_raw;
+  
+  do {
+      if (optimization_solve_result) {
+      prediction_dt = getPredictionDeltaTime(mpc_start_time, reference_trajectory, current_kinematics);
+      } else {
+      prediction_dt *= 0.6;
+      }
 
-  // get the diagnostic data
-  const auto [success_data_for_diagnostic, mpc_data_for_diagnostic] =
-    getData(mpc_resampled_ref_trajectory, current_steer, current_kinematics);
-  if (!success_data_for_diagnostic) {
-    return fail_warn_throttle("fail to get MPC Data for the diagnostic. Stop MPC.");
-  }
+    std::tie(success_resample, mpc_resampled_ref_trajectory) =
+      resampleMPCTrajectoryByTime(mpc_start_time, prediction_dt, reference_trajectory);
+    if (!success_resample) {
+      return fail_warn_throttle("trajectory resampling failed. Stop MPC.");
+    }
 
-  // get the diagnostic data w.r.t. the original trajectory
-  const auto [success_data_traj_raw, mpc_data_traj_raw] =
-    getData(mpc_traj_raw, current_steer, current_kinematics);
-  if (!success_data_traj_raw) {
-    return fail_warn_throttle("fail to get MPC Data for the raw trajectory. Stop MPC.");
-  }
+    // get the diagnostic data
+    std::tie(success_data_for_diagnostic, mpc_data_for_diagnostic) =
+      getData(mpc_resampled_ref_trajectory, current_steer, current_kinematics);
+    if (!success_data_for_diagnostic) {
+      return fail_warn_throttle("fail to get MPC Data for the diagnostic. Stop MPC.");
+    }
 
-  // generate mpc matrix : predict equation Xec = Aex * x0 + Bex * Uex + Wex
-  const auto mpc_matrix = generateMPCMatrix(mpc_resampled_ref_trajectory, prediction_dt);
+    // get the diagnostic data w.r.t. the original trajectory
+    std::tie(success_data_traj_raw, mpc_data_traj_raw) =
+      getData(mpc_traj_raw, current_steer, current_kinematics);
+    if (!success_data_traj_raw) {
+      return fail_warn_throttle("fail to get MPC Data for the raw trajectory. Stop MPC.");
+    }
 
-  // solve Optimization problem
-  const auto [success_opt, Uex] = executeOptimization(
-    mpc_matrix, x0_delayed, prediction_dt, mpc_resampled_ref_trajectory,
-    current_kinematics.twist.twist.linear.x);
-  if (!success_opt) {
-    return fail_warn_throttle("optimization failed. Stop MPC.");
-  }
+    // generate mpc matrix : predict equation Xec = Aex * x0 + Bex * Uex + Wex
+    mpc_matrix = generateMPCMatrix(mpc_resampled_ref_trajectory, prediction_dt);
+
+    // solve Optimization problem
+    std::tie(success_opt, Uex) = executeOptimization(
+      mpc_matrix, x0_delayed, prediction_dt, mpc_resampled_ref_trajectory,
+      current_kinematics.twist.twist.linear.x);
+    if (!success_opt) {
+      return fail_warn_throttle("optimization failed. Stop MPC.");
+    }
+    std::cerr << "prediction_dt: " << prediction_dt << "optimization_solve_result" << optimization_solve_result << std::endl;
+  } while (!optimization_solve_result);
 
   // apply filters for the input limitation and low pass filter
   const double u_saturated = std::clamp(Uex(0), -m_steer_lim, m_steer_lim);
@@ -617,9 +636,9 @@ std::pair<bool, VectorXd> MPC::executeOptimization(
   lbA(0) = m_raw_steer_cmd_prev - steer_rate_limits(0) * m_ctrl_period;
 
   auto t_start = std::chrono::system_clock::now();
-  bool solve_result = m_qpsolver_ptr->solve(H, f.transpose(), A, lb, ub, lbA, ubA, Uex);
+  optimization_solve_result = m_qpsolver_ptr->solve(H, f.transpose(), A, lb, ub, lbA, ubA, Uex);
   auto t_end = std::chrono::system_clock::now();
-  if (!solve_result) {
+  if (!optimization_solve_result) {
     warn_throttle("qp solver error");
     return {false, {}};
   }
