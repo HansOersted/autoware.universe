@@ -80,21 +80,21 @@ bool MPC::calculateMPC(
     std::tie(success_resample, mpc_resampled_ref_trajectory) =
       resampleMPCTrajectoryByTime(mpc_start_time, prediction_dt, reference_trajectory);
     if (!success_resample) {
-      return fail_warn_throttle("trajectory resampling failed. Stop MPC.");
+      std::cerr << "trajectory resampling failed." << std::endl;
     }
 
     // get the diagnostic data
     std::tie(success_data_for_diagnostic, mpc_data_for_diagnostic) =
       getData(mpc_resampled_ref_trajectory, current_steer, current_kinematics);
     if (!success_data_for_diagnostic) {
-      return fail_warn_throttle("fail to get MPC Data for the diagnostic. Stop MPC.");
+      std::cerr << "fail to get MPC Data for the diagnostic." << std::endl;
     }
 
     // get the diagnostic data w.r.t. the original trajectory
     std::tie(success_data_traj_raw, mpc_data_traj_raw) =
       getData(mpc_traj_raw, current_steer, current_kinematics);
     if (!success_data_traj_raw) {
-      return fail_warn_throttle("fail to get MPC Data for the raw trajectory. Stop MPC.");
+      std::cerr << "fail to get MPC Data for the raw trajectory." << std::endl;
     }
 
     // generate mpc matrix : predict equation Xec = Aex * x0 + Bex * Uex + Wex
@@ -105,7 +105,7 @@ bool MPC::calculateMPC(
       mpc_matrix, x0_delayed, prediction_dt, mpc_resampled_ref_trajectory,
       current_kinematics.twist.twist.linear.x);
     if (!success_opt) {
-      return fail_warn_throttle("optimization failed. Stop MPC.");
+      std::cerr << "optimization failed." << std::endl;
     }
     std::cerr << "prediction_dt: " << prediction_dt << "optimization_solve_result" << optimization_solve_result << std::endl;
   } while (!optimization_solve_result);
