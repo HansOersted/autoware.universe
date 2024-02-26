@@ -600,6 +600,13 @@ std::pair<bool, VectorXd> MPC::executeOptimization(
 
   auto t_start = std::chrono::system_clock::now();
   bool solve_result = m_qpsolver_ptr->solve(H, f.transpose(), A, lb, ub, lbA, ubA, Uex);
+  std::cerr << "H = " << H << std::endl;
+  std::cerr << "f.transpose() = " << f.transpose() << std::endl;
+  std::cerr << "A = " << A << std::endl;
+  std::cerr << "lb = " << lb << std::endl;
+  std::cerr << "ub = " << ub << std::endl;
+  std::cerr << "lbA = " << lbA << std::endl;
+  std::cerr << "ubA = " << ubA << std::endl;
   auto t_end = std::chrono::system_clock::now();
   if (!solve_result) {
     warn_throttle("qp solver error");
