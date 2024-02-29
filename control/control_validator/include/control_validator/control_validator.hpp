@@ -56,6 +56,8 @@ public:
 private:
   void setupDiag();
 
+  void publishQPError();
+
   void setupParameters();
 
   bool isDataReady();
@@ -79,6 +81,7 @@ private:
   bool display_on_terminal_ = true;
 
   Updater diag_updater_{this};
+  Updater qpsolver_checker_{this};
 
   ControlValidatorStatus validation_status_;
   ValidationParams validation_params_;  // for thresholds

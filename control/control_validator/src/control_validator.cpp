@@ -97,6 +97,16 @@ void ControlValidator::setupDiag()
   });
 }
 
+void ControlValidator::publishQPError()
+{
+  auto & qp = qpsolver_checker_;
+  qp.setHardwareID("qp_solver_checker");
+
+  std::string ns = "qp_solver_checker_";
+  qp.add(ns + "qp_solver_error", stat.summary(DiagnosticStatus::ERROR, msg))
+  qpsolver_checker_.force_update();;
+}
+
 bool ControlValidator::isDataReady()
 {
   const auto waiting = [this](const auto s) {

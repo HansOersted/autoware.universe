@@ -584,6 +584,7 @@ std::pair<bool, VectorXd> MPC::executeOptimization(
   auto t_end = std::chrono::system_clock::now();
   if (!solve_result) {
     warn_throttle("qp solver error");
+    ControlValidator::publishQPError();
     return {false, {}};
   }
 
