@@ -159,6 +159,13 @@ Float32MultiArrayStamped MPC::generateDiagData(
   append_diag(iteration_num);             // [18] iteration number
   append_diag(runtime);                   // [19] runtime of the latest problem solved
   append_diag(objective_value);           // [20] objective value of the latest problem solved
+  append_diag(H_log);     // [21] H
+  append_diag(f_tanspose_log);  // [22] f
+  append_diag(A_log);           // [23] A
+  append_diag(lb_log);          // [24] lb
+  append_diag(ub_log);          // [25] ub
+  append_diag(lbA_log);         // [26] lbA
+  append_diag(ubA_log);         // [27] ubA
 
   return diagnostic;
 }
@@ -578,6 +585,14 @@ std::pair<bool, VectorXd> MPC::executeOptimization(
   VectorXd lbA = -steer_rate_limits * prediction_dt;
   ubA(0) = m_raw_steer_cmd_prev + steer_rate_limits(0) * m_ctrl_period;
   lbA(0) = m_raw_steer_cmd_prev - steer_rate_limits(0) * m_ctrl_period;
+
+  H_log = H;
+  f_tanspose_log = f.transpose();
+  A_log = A;
+  lb_log = lb;
+  ub_log = ub;
+  lbA_log = lbA;
+  ubA_log = ubA;
 
   auto t_start = std::chrono::system_clock::now();
   bool solve_result = m_qpsolver_ptr->solve(H, f.transpose(), A, lb, ub, lbA, ubA, Uex);

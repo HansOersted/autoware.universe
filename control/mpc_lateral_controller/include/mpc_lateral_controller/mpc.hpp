@@ -221,6 +221,14 @@ private:
 
   double m_min_prediction_length = 5.0;  // Minimum prediction distance.
 
+  Eigen::MatrixXd H_log;  // Hessian matrix for debugging.
+  Eigen::MatrixXd f_tanspose_log;
+  Eigen::MatrixXd A_log;
+  Eigen::VectorXd lb_log;
+  Eigen::VectorXd ub_log;
+  Eigen::VectorXd lbA_log;
+  Eigen::VectorXd ubA_log;
+
   rclcpp::Publisher<Trajectory>::SharedPtr m_debug_frenet_predicted_trajectory_pub;
   /**
    * @brief Get variables for MPC calculation.
