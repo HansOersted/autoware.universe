@@ -256,6 +256,10 @@ trajectory_follower::LateralOutput MpcLateralController::run(
   // the vehicle will return to the path by re-planning the trajectory or external operation.
   // After the recovery, the previous value of the optimization may deviate greatly from
   // the actual steer angle, and it may make the optimization result unstable.
+
+  const discount_in_J6 = 0.8;
+  ctrl_cmd.steering_tire_angle *= discount_in_J6; // to mimic the real vehicle in J6
+
   if (!is_mpc_solved) {
     m_mpc->resetPrevResult(m_current_steering);
   } else {
