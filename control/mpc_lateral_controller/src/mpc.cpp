@@ -45,9 +45,17 @@ bool MPC::calculateMPC(
   const auto reference_trajectory =
     applyVelocityDynamicsFilter(m_reference_trajectory, current_kinematics);
 
+  const double offset_x = 0.1;
+  const double offset_y = 0.0;
+  auto reference_trajectory_polluted = reference_trajectory;
+  for (auto &value : reference_trajectory_polluted.x) { 
+    value += offset_x; }
+  for (auto &value : reference_trajectory_polluted.y) {
+    value += offset_y; }
+
   // get the necessary data
   const auto [success_data, mpc_data] =
-    getData(reference_trajectory, current_steer, current_kinematics);
+    getData(reference_trajectory_polluted, current_steer, current_kinematics);
   if (!success_data) {
     return fail_warn_throttle("fail to get MPC Data. Stop MPC.");
   }
@@ -57,7 +65,7 @@ bool MPC::calculateMPC(
 
   // apply time delay compensation to the initial state
   const auto [success_delay, x0_delayed] =
-    updateStateForDelayCompensation(reference_trajectory, mpc_data.nearest_time, x0);
+    updateStateForDelayCompensation(reference_trajectory_polluted, mpc_data.nearest_time, x0);
   if (!success_delay) {
     return fail_warn_throttle("delay compensation failed. Stop MPC.");
   }
@@ -65,10 +73,10 @@ bool MPC::calculateMPC(
   // resample reference trajectory with mpc sampling time
   const double mpc_start_time = mpc_data.nearest_time + m_param.input_delay;
   const double prediction_dt =
-    getPredictionDeltaTime(mpc_start_time, reference_trajectory, current_kinematics);
+    getPredictionDeltaTime(mpc_start_time, reference_trajectory_polluted, current_kinematics);
 
   const auto [success_resample, mpc_resampled_ref_trajectory] =
-    resampleMPCTrajectoryByTime(mpc_start_time, prediction_dt, reference_trajectory);
+    resampleMPCTrajectoryByTime(mpc_start_time, prediction_dt, reference_trajectory_polluted);
   if (!success_resample) {
     return fail_warn_throttle("trajectory resampling failed. Stop MPC.");
   }
