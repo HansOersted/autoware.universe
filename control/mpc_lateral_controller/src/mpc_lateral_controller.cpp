@@ -248,6 +248,9 @@ trajectory_follower::LateralOutput MpcLateralController::run(
     m_is_ctrl_cmd_prev_initialized = true;
   }
 
+  const double steering_offset_to_MPC = 0.01; // to mimic the offset in J6
+  m_current_steering.steering_tire_angle -= steering_offset_to_MPC; // to mimic the offset in J6 (feeding the biased steering to the MPC)
+
   const bool is_mpc_solved = m_mpc->calculateMPC(
     m_current_steering, m_current_kinematic_state, ctrl_cmd, predicted_traj, debug_values);
 
@@ -259,6 +262,9 @@ trajectory_follower::LateralOutput MpcLateralController::run(
 
   // const double discount_in_J6 = 0.8;
   // ctrl_cmd.steering_tire_angle *= discount_in_J6; // to mimic the real vehicle in J6
+
+  const double steering_offset_to_system = 0.01; // to mimic the offset in J6
+  ctrl_cmd.steering_tire_angle += steering_offset_to_system; // feeding the biased steering to the dynamic model
 
   if (!is_mpc_solved) {
     m_mpc->resetPrevResult(m_current_steering);
