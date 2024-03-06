@@ -45,7 +45,7 @@ bool MPC::calculateMPC(
   const auto reference_trajectory =
     applyVelocityDynamicsFilter(m_reference_trajectory, current_kinematics);
 
-  const double offset_x = 0.1;
+  const double offset_x = 0.0;
   const double offset_y = 0.0;
   auto reference_trajectory_polluted = reference_trajectory;
   for (auto &value : reference_trajectory_polluted.x) { 
